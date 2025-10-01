@@ -154,6 +154,9 @@ info_collect () {
         NAME=$($SHELL_COMMAND getprop ro.product.name)
         PRODUCT_CODE=$($SHELL_COMMAND getprop ro.product.code)
         CHIPNAME=$($SHELL_COMMAND getprop ro.chipname)
+        if [[ -z ${CHIPNAME} ]]; then
+	       CHIPNAME=$($SHELL_COMMAND getprop ro.hardware ro.hardware.chipname)
+        fi
         SERIAL_NUMBER=$($SHELL_COMMAND getprop ril.serialnumber)
         BASEBAND_VERSION=$($SHELL_COMMAND getprop gsm.version.baseband)
         COUNTRY_CODE=$($SHELL_COMMAND getprop ro.csc.country_code)
@@ -175,6 +178,9 @@ info_collect () {
         IMEI=$(${ADB} shell dumpsys iphonesubinfo | grep 'Device ID' | grep -o '[0-9]+')
         if [[ -z ${IMEI} ]]; then
 	       IMEI=$(${ADB} shell service call iphonesubinfo 1 | awk -F "'" '{print $2}' | sed '1 d' | tr -d '.' | awk '{print}' ORS=)
+        fi
+        if [[ -z ${IMEI} ]]; then
+	       IMEI=$(${ADB} shell service call iphonesubinfo 1 s16 com.android.shell  | cut -d "'" -f2| grep -Eo '[0-9]'| xargs| sed 's/\ //g')
         fi
 
         if [[ $(adb shell id) =~ "root" ]] || [[ $(adb shell su -c id) =~ "root" ]];then 
